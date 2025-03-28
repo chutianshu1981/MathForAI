@@ -1,0 +1,61 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build output
+/_build/
+/out/
+
+# Temporary notes
+*.tmp
+temp/
+
+# MATLAB specific
+*.asv
+*.m~
+*.mex*
+slprj/
+codegen/
+*.slxc
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.ipynb_checkpoints
+*.egg-info/
+.pytest_cache/
+
+# Data and output files
+*.csv
+*.xlsx
+*.mat
+*.dat
+/data/large_files/
+
+# LaTeX documents
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.bbl
+*.blg
+
+# Plots and figures (optional, uncomment if needed)
+# *.png
+# *.jpg
+# *.pdf
