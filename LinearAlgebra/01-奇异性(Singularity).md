@@ -18,10 +18,55 @@ A = \begin{bmatrix} 1 & 2 \\ 3 & 6 \end{bmatrix}
 \]
 因此 \( A \) 是**奇异矩阵**。
 
+#### **代码实现**
+```matlab
+% MATLAB代码
+A = [1 2; 3 6];
+det_A = det(A)  % 计算行列式
+if det_A == 0
+    disp('矩阵A是奇异的')
+else
+    disp('矩阵A不是奇异的')
+end
+```
+
+```python
+# Python代码
+import numpy as np
+
+A = np.array([[1, 2], [3, 6]])
+det_A = np.linalg.det(A)  # 计算行列式
+print(f'行列式值: {det_A}')
+print('矩阵A是奇异的' if abs(det_A) < 1e-10 else '矩阵A不是奇异的')
+```
+
 ---
 
 ### **2. 通过矩阵的秩（Rank）判断**
-如果矩阵的行秩（Row Rank）和列秩（Column Rank）小于矩阵的大小（即 \(\text{Rank}(A) < n\)），则矩阵是**奇异的**。
+
+#### **秩的定义**
+矩阵的**秩**是一个衡量矩阵"有效维度"的指标：
+1. **线性无关向量的最大数量**：矩阵中线性无关的行向量或列向量的最大个数
+2. **等价定义**：
+   - **行秩**：线性无关的行向量的最大数量
+   - **列秩**：线性无关的列向量的最大数量
+   - 根据**秩的等式定理**，行秩 = 列秩，因此可以简单称为矩阵的秩
+
+#### **计算矩阵的秩**
+1. **初等行变换法**：
+   - 将矩阵化为**行阶梯形矩阵**
+   - 非零行的数量即为矩阵的秩
+   - 具体步骤：
+     1. 通过初等行变换将矩阵转化为行阶梯形
+     2. 继续变换得到行最简形
+     3. 计算非零行数量
+
+2. **子式法**：
+   - 检查各阶子式是否为零
+   - 最高阶非零子式的阶数即为矩阵的秩
+
+#### **奇异性判断**
+如果矩阵的秩小于矩阵的大小（即 \(\text{Rank}(A) < n\)），则矩阵是**奇异的**。
 
 #### **示例**
 矩阵：
@@ -34,6 +79,30 @@ B = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}
 \]
 因此，矩阵 \( B \) **是奇异矩阵**。
 
+#### **代码实现**
+```matlab
+% MATLAB代码
+B = [1 2 3; 4 5 6; 7 8 9];
+rank_B = rank(B)  % 计算矩阵的秩
+n = size(B, 1);   % 矩阵的大小
+if rank_B < n
+    disp('矩阵B是奇异的')
+else
+    disp('矩阵B不是奇异的')
+end
+```
+
+```python
+# Python代码
+import numpy as np
+
+B = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+rank_B = np.linalg.matrix_rank(B)  # 计算矩阵的秩
+n = B.shape[0]  # 矩阵的大小
+print(f'矩阵的秩: {rank_B}')
+print('矩阵B是奇异的' if rank_B < n else '矩阵B不是奇异的')
+```
+
 ---
 
 ### **3. 通过逆矩阵（Inverse Matrix）判断**
@@ -41,7 +110,34 @@ B = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 7 & 8 & 9 \end{bmatrix}
 \[
 A^{-1} = \frac{1}{\det(A)} \text{Adj}(A)
 \]
-如果 \( \det(A) = 0 \)，则分母为 0，矩阵 \( A \) **没有逆矩阵**，说明它是奇异的。
+如果 \( \det(A) = 0 \)，则分母为 0，矩阵 \( A \) **没有逆矩阵**，说明它是奇singular的。
+
+#### **代码实现**
+```matlab
+% MATLAB代码
+A = [1 2; 3 6];
+try
+    inv_A = inv(A);  % 尝试计算逆矩阵
+    disp('矩阵A可逆（非奇异）')
+    disp('逆矩阵为:')
+    disp(inv_A)
+catch
+    disp('矩阵A不可逆（奇异）')
+end
+```
+
+```python
+# Python代码
+import numpy as np
+
+A = np.array([[1, 2], [3, 6]])
+try:
+    inv_A = np.linalg.inv(A)  # 尝试计算逆矩阵
+    print('矩阵A可逆（非奇异）')
+    print('逆矩阵为:\n', inv_A)
+except np.linalg.LinAlgError:
+    print('矩阵A不可逆（奇异）')
+```
 
 ---
 
@@ -64,6 +160,30 @@ C = \begin{bmatrix} 4 & 2 \\ 2 & 1 \end{bmatrix}
 \lambda(\lambda - 5) = 0
 \]
 解得特征值 \( \lambda_1 = 0, \lambda_2 = 5 \)，由于一个特征值是 0，因此矩阵是**奇异的**。
+
+#### **代码实现**
+```matlab
+% MATLAB代码
+C = [4 2; 2 1];
+eig_vals = eig(C);  % 计算特征值
+disp('特征值:')
+disp(eig_vals)
+if any(abs(eig_vals) < 1e-10)  % 检查是否有接近0的特征值
+    disp('矩阵C是奇异的')
+else
+    disp('矩阵C不是奇异的')
+end
+```
+
+```python
+# Python代码
+import numpy as np
+
+C = np.array([[4, 2], [2, 1]])
+eig_vals = np.linalg.eigvals(C)  # 计算特征值
+print('特征值:', eig_vals)
+print('矩阵C是奇异的' if np.any(np.abs(eig_vals) < 1e-10) else '矩阵C不是奇异的')
+```
 
 ---
 
@@ -93,6 +213,51 @@ C = \begin{bmatrix} 4 & 2 \\ 2 & 1 \end{bmatrix}
      - 使用广义逆（如伪逆）求解
      - 采用正则化方法
      - 重新建模问题以避免奇异性
+
+#### **代码实现**
+```matlab
+% MATLAB代码：展示奇异矩阵导致的方程组求解情况
+% 例1：无解情况（平行线）
+A1 = [1 2; 2 4];  % 奇异矩阵（第二行是第一行的2倍）
+b1 = [1; 3];      % 不相容的右端向量
+try
+    x1 = A1\b1;   % 尝试求解 A1x = b1
+catch
+    disp('方程组无解（直线平行）')
+end
+
+% 例2：无穷多解情况（重合线）
+A2 = [1 2; 2 4];  % 同样的奇异矩阵
+b2 = [1; 2];      % 相容的右端向量（第二个元素是第一个的2倍）
+x2 = A2\b2;       % 尝试求解 A2x = b2
+disp('一个可能的解：')
+disp(x2)
+disp('但存在无穷多解')
+```
+
+```python
+# Python代码：展示奇异矩阵导致的方程组求解情况
+import numpy as np
+
+# 例1：无解情况（平行线）
+A1 = np.array([[1, 2], [2, 4]])  # 奇异矩阵
+b1 = np.array([1, 3])            # 不相容的右端向量
+try:
+    x1 = np.linalg.solve(A1, b1)
+except np.linalg.LinAlgError:
+    print('方程组无解（直线平行）')
+
+# 例2：无穷多解情况（重合线）
+A2 = np.array([[1, 2], [2, 4]])  # 同样的奇异矩阵
+b2 = np.array([1, 2])            # 相容的右端向量
+try:
+    # 使用伪逆找到一个可能的解
+    x2 = np.linalg.pinv(A2) @ b2
+    print('一个可能的解:', x2)
+    print('但存在无穷多解')
+except np.linalg.LinAlgError:
+    print('计算错误')
+```
 
 ---
 
