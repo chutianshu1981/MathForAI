@@ -23,7 +23,7 @@ A = \begin{bmatrix} 1 & 2 \\ 3 & 6 \end{bmatrix}
 % MATLAB代码
 A = [1 2; 3 6];
 det_A = det(A)  % 计算行列式
-if det_A == 0
+if abs(det_A) < 1e-10  % 使用阈值判断，而不是精确的0
     disp('矩阵A是奇异的')
 else
     disp('矩阵A不是奇异的')
@@ -37,12 +37,31 @@ import numpy as np
 A = np.array([[1, 2], [3, 6]])
 det_A = np.linalg.det(A)  # 计算行列式
 print(f'行列式值: {det_A}')
-print('矩阵A是奇异的' if abs(det_A) < 1e-10 else '矩阵A不是奇异的')
+if abs(det_A) < 1e-10:
+    print('矩阵A是奇异的')
+else:
+    print('矩阵A不是奇异的')
+
+# 注意：在数值计算中，由于浮点数精度限制，不应直接使用 == 0 判断
+# 例如：0.1 + 0.2 = 0.30000000000000004
+# 因此使用一个小的阈值(如1e-10)来判断数字是否足够接近0
+# 这样可以避免因为舍入误差导致的错误判断
 ```
 
 ---
 
 ### **2. 通过矩阵的秩（Rank）判断**
+
+#### **线性无关的概念**
+两个或多个向量的**线性无关**是指：一个向量不能由其他向量的线性组合（缩放和加减）表示。例如：
+- 向量 \( v_1 = [1,0] \) 和 \( v_2 = [0,1] \) 是线性无关的，因为无法通过缩放其中一个向量得到另一个
+- 向量 \( v_1 = [1,2] \) 和 \( v_2 = [2,4] \) 是线性相关的，因为 \( v_2 = 2v_1 \)
+
+用数学语言表达：若向量组 \( v_1, v_2, ..., v_n \) 满足：
+\[
+c_1v_1 + c_2v_2 + ... + c_nv_n = 0
+\]
+当且仅当所有系数 \( c_i = 0 \) 时等式成立，则称这组向量**线性无关**。
 
 #### **秩的定义**
 矩阵的**秩**是一个衡量矩阵"有效维度"的指标：
@@ -50,7 +69,12 @@ print('矩阵A是奇异的' if abs(det_A) < 1e-10 else '矩阵A不是奇异的')
 2. **等价定义**：
    - **行秩**：线性无关的行向量的最大数量
    - **列秩**：线性无关的列向量的最大数量
-   - 根据**秩的等式定理**，行秩 = 列秩，因此可以简单称为矩阵的秩
+   - **秩的等式定理**：对于任意矩阵，其行秩等于列秩
+     - 这个定理说明了矩阵的一个重要性质：行向量的线性相关性与列向量的线性相关性是等价的
+     - 例如：对于矩阵 \( \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix} \)
+       * 行向量是 [1,2] 和 [2,4]，第二行是第一行的2倍，所以行秩是1
+       * 列向量是 [1,2]ᵀ 和 [2,4]ᵀ，第二列是第一列的2倍，所以列秩也是1
+     - 这个性质使我们可以简单地用"秩"来表示矩阵的线性无关向量的最大数量，而不需要区分行秩和列秩
 
 #### **计算矩阵的秩**
 1. **初等行变换法**：
@@ -60,10 +84,101 @@ print('矩阵A是奇异的' if abs(det_A) < 1e-10 else '矩阵A不是奇异的')
      1. 通过初等行变换将矩阵转化为行阶梯形
      2. 继续变换得到行最简形
      3. 计算非零行数量
+   
+   **示例**：
+   对于矩阵：
+   \[
+   A = \begin{bmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 1 & 3 & 4 \end{bmatrix}
+   \]
+   通过初等行变换：
+   \[
+   \begin{bmatrix} 1 & 2 & 3 \\ 2 & 4 & 6 \\ 1 & 3 & 4 \end{bmatrix} 
+   \xrightarrow{R_2-2R_1} \begin{bmatrix} 1 & 2 & 3 \\ 0 & 0 & 0 \\ 1 & 3 & 4 \end{bmatrix}
+   \xrightarrow{R_3-R_1} \begin{bmatrix} 1 & 2 & 3 \\ 0 & 0 & 0 \\ 0 & 1 & 1 \end{bmatrix}
+   \]
+   最终得到两个非零行，因此矩阵的秩为2。
+
+   **代码实现**：
+   ```matlab
+   % MATLAB代码
+   A = [1 2 3; 2 4 6; 1 3 4];
+   % 使用rref获取行最简形矩阵
+   [R, jb] = rref(A);
+   disp('行最简形矩阵:')
+   disp(R)
+   disp(['矩阵的秩: ', num2str(length(jb))])
+   ```
+
+   ```python
+   # Python代码
+   import numpy as np
+   from scipy import linalg
+
+   A = np.array([[1, 2, 3], [2, 4, 6], [1, 3, 4]])
+   # 使用SVD分解计算秩
+   rank_A = np.linalg.matrix_rank(A)
+   print(f'矩阵的秩: {rank_A}')
+   
+   # 使用高斯消元（可选）
+   def gauss_rank(A):
+       R = linalg.qr(A, mode='r')[0]  # QR分解的R部分
+       tol = 1e-10  # 容差
+       return sum(np.abs(np.diag(R)) > tol)
+   
+   print(f'通过高斯消元计算的秩: {gauss_rank(A)}')
+   ```
 
 2. **子式法**：
    - 检查各阶子式是否为零
    - 最高阶非零子式的阶数即为矩阵的秩
+   
+   **示例**：
+   对于矩阵：
+   \[
+   A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}
+   \]
+   计算各阶子式：
+   - 1阶子式：|1| ≠ 0，|2| ≠ 0，|2| ≠ 0，|4| ≠ 0
+   - 2阶子式：\( \begin{vmatrix} 1 & 2 \\ 2 & 4 \end{vmatrix} = 0 \)
+   因此最高非零阶数为1，矩阵的秩为1。
+
+   **代码实现**：
+   ```matlab
+   % MATLAB代码：计算子式
+   A = [1 2; 2 4];
+   % 计算所有1阶子式
+   minors1 = diag(A);
+   % 计算2阶子式（此例中就是行列式）
+   minor2 = det(A);
+   disp('1阶子式:')
+   disp(minors1)
+   disp('2阶子式:')
+   disp(minor2)
+   ```
+
+   ```python
+   # Python代码：计算子式
+   import numpy as np
+   from itertools import combinations
+
+   def compute_minors(A, order):
+       n = A.shape[0]
+       minors = []
+       # 获取所有可能的行和列组合
+       indices = list(combinations(range(n), order))
+       for rows in indices:
+           for cols in indices:
+               # 提取子矩阵
+               sub_matrix = A[np.ix_(rows, cols)]
+               minors.append(np.linalg.det(sub_matrix))
+       return np.array(minors)
+
+   A = np.array([[1, 2], [2, 4]])
+   minors1 = compute_minors(A, 1)  # 1阶子式
+   minors2 = compute_minors(A, 2)  # 2阶子式
+   print('1阶子式:', minors1)
+   print('2阶子式:', minors2)
+   ```
 
 #### **奇异性判断**
 如果矩阵的秩小于矩阵的大小（即 \(\text{Rank}(A) < n\)），则矩阵是**奇异的**。
@@ -100,7 +215,10 @@ B = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 rank_B = np.linalg.matrix_rank(B)  # 计算矩阵的秩
 n = B.shape[0]  # 矩阵的大小
 print(f'矩阵的秩: {rank_B}')
-print('矩阵B是奇异的' if rank_B < n else '矩阵B不是奇异的')
+if rank_B < n:
+    print('矩阵B是奇异的')
+else:
+    print('矩阵B不是奇异的')
 ```
 
 ---
@@ -182,7 +300,10 @@ import numpy as np
 C = np.array([[4, 2], [2, 1]])
 eig_vals = np.linalg.eigvals(C)  # 计算特征值
 print('特征值:', eig_vals)
-print('矩阵C是奇异的' if np.any(np.abs(eig_vals) < 1e-10) else '矩阵C不是奇异的')
+if np.any(np.abs(eig_vals) < 1e-10):
+    print('矩阵C是奇异的')
+else:
+    print('矩阵C不是奇异的')
 ```
 
 ---
